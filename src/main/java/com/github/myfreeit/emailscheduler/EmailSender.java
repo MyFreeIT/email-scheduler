@@ -11,12 +11,12 @@ package com.github.myfreeit.emailscheduler;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 public class EmailSender {
+  private EmailSender() {}
 
   private static final Properties config = new Properties();
 
@@ -39,9 +39,10 @@ public class EmailSender {
 
     Properties props = new Properties();
     props.put("mail.smtp.auth", config.getProperty("smtp.auth", "true"));
-    props.put("mail.smtp.starttls.enable", config.getProperty("smtp.starttls", "true"));
+    props.put("mail.smtp.starttls.enable", config.getProperty("smtp.starttls.enable", "true"));
     props.put("mail.smtp.host", config.getProperty("smtp.host"));
     props.put("mail.smtp.port", config.getProperty("smtp.port"));
+    props.put("mail.smtp.ssl.trust", config.getProperty("smtp.ssl.trust"));
 
     Session session =
         Session.getInstance(
