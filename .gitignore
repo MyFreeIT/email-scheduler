@@ -1,0 +1,37 @@
+# Maven build
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/
+.settings/
+.classpath
+.project
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Executables
+*.exe
+*.msi
+
+# SonarQube
+.sonar/
+.scannerwork/
+sonar-report.json
+
+# System/Temp
+*.swp
+*.bak
+*.tmp
+
+# Config with sensitive data
+src/main/resources/config.properties
