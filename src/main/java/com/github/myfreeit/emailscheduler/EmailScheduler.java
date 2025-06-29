@@ -16,35 +16,57 @@ import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
 public class EmailScheduler {
+  private static final Scheduler scheduler;
+
+  static {
+    try {
+      scheduler = StdSchedulerFactory.getDefaultScheduler();
+      scheduler.start();
+    } catch (SchedulerException e) {
+      throw new RuntimeException("Failed to initialize Quartz scheduler", e);
+    }
+  }
+
   private EmailScheduler() {}
 
-  public static void schedule(String to, String subject, String body, LocalDateTime dateTime) {
+  public static Scheduler getScheduler() {
+    return scheduler;
+  }
+
+  public static String schedule(String to, String subject, String body, LocalDateTime dateTime) {
     try {
+      String jobId = "emailJob_" + System.currentTimeMillis();
       JobDetail job =
           JobBuilder.newJob(EmailJob.class)
+              .withIdentity(jobId, "emails")
+              .withDescription("Send email to " + to)
               .usingJobData("to", to)
               .usingJobData("subject", subject)
               .usingJobData("body", body)
-              .withIdentity("emailJob" + System.currentTimeMillis(), "group1")
               .build();
 
       Trigger trigger =
           TriggerBuilder.newTrigger()
+              .withIdentity("trigger_" + jobId, "emails")
               .startAt(Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant()))
+              .withSchedule(SimpleScheduleBuilder.simpleSchedule())
               .build();
 
-      Scheduler scheduler = new StdSchedulerFactory().getScheduler();
-      scheduler.start();
       scheduler.scheduleJob(job, trigger);
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (SchedulerException e) {
+      throw new RuntimeException("Failed to schedule email", e);
     }
+    return to;
   }
 
   public static class EmailJob implements Job {
+    @Override
     public void execute(JobExecutionContext context) {
       JobDataMap data = context.getMergedJobDataMap();
-      EmailSender.send(data.getString("to"), data.getString("subject"), data.getString("body"));
+      String to = data.getString("to");
+      String subject = data.getString("subject");
+      String body = data.getString("body");
+      EmailSender.send(to, subject, body);
     }
   }
 }
